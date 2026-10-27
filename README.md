@@ -169,24 +169,6 @@ isort>=5.12
 
 ---
 
-## Docker Architecture
-
-### Why Docker?
-
-- **Consistency**: All team members use identical ROS 2 Humble + Python environment
-- **Isolation**: No risk of "breaking" your host system with ROS dependencies
-- **ROS 2 GUI Support**: Gazebo and RViz work via X11 forwarding
-- **Portability**: One command to set up development environment
-
-### What Goes Where
-
-| Location | Contents | Git-tracked? |
-|----------|----------|--------------|
-| **GitHub Repo** | Source code, config files, requirements | ✅ ~5 MB |
-| **Local Disk** | Docker images (~5 GB), build artifacts | ❌ |
-| **Container** | Python packages, ROS 2 runtime | N/A |
-| **.gitignore** | `build/`, `install/`, `log/`, `venv/` | N/A |
-
 ### Troubleshooting Docker
 
 **Problem**: `docker compose` command not found  
@@ -313,22 +295,6 @@ Algorithm `safe(s, e)` ensures deadlock freedom by verifying that after any prop
 - **Blocked Time**: Time spent waiting for cells
 
 ---
-
-## Literature
-
-See `docs/literature.md` for annotated bibliography on:
-- Resource Allocation Systems (RAS)
-- AGV deadlock avoidance and Banker's algorithm
-- Supervisory control of discrete-event systems
-- Petri net-based deadlock prevention
-- Multi-robot path planning (MAPF)
-
-Key references:
-- Wonham & Cai, *Supervisory Control of Discrete-Event Systems*, Springer 2018
-- Ramadge & Wonham, *The control of discrete event systems*, Proc. IEEE 1989
-- Modified Banker's algorithm variants for multi-AGV systems (IEEE CASE 2011)
-- Zone-control deadlock prediction for AGV systems (Int. J. Production Research 1994)
-
 ---
 
 ## Team Roles
@@ -349,10 +315,5 @@ Key references:
 - **Code Review**: Pull requests require 1 approval, passing CI
 - **Documentation**: LaTeX reports via Overleaf, diagrams in TikZ
 
----
-
-## Disclosure
-
-Reports are intended for the instructor and the team. Source code is kept in a private repository during the semester and may be published under the MIT licence after grading, with the consent of all members.
 
 ---
