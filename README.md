@@ -217,6 +217,30 @@ pytest tests/ --cov=src --cov-report=html
 # Reachability analysis (reduced instance)
 python scripts/reachability_check.py --robots 4 --layout small
 ```
+## Docker Development Environment
+
+**Wymagania**: Docker 20+, Docker Compose v2, X11 (Linux/macOS) lub WSL2 z X-server (Windows)
+
+### Szybki Start
+
+```bash
+# 1. Budowanie obrazu (tylko raz)
+make build
+
+# 2. Uruchomienie kontenera w tle
+make up
+
+# 3. Wejście do kontenera
+make shell
+
+# 4. Uruchomienie symulacji
+make simulate
+
+# 5. Testy jednostkowe
+make test
+
+# 6. Budowanie ROS 2 paczek
+make colcon-build
 
 ---
 

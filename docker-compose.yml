@@ -1,0 +1,18 @@
+services:
+  ros_dev:
+    build: .
+    container_name: ros2_humble_dev
+    network_mode: host
+    security_opt:
+      - seccomp=unconfined
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/root/.Xauthority
+    volumes:
+      - .:/ros2_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.Xauthority:/root/.Xauthority:ro
+    stdin_open: true
+    tty: true
+    working_dir: /ros2_ws
