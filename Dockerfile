@@ -20,11 +20,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalacja Python dependencies
-COPY requirements.txt /tmp/requirements.txt
+COPY requirements.txt requirements-dev.txt /tmp/
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt \
-    && pip3 install pytest pytest-cov flake8 black isort \
-    && rm /tmp/requirements.txt
-
+    -r /tmp/requirements-dev.txt \
+    && rm /tmp/requirements.txt /tmp/requirements-dev.txt
 # Tworzymy folder workspace'u wewnątrz kontenera
 WORKDIR /ros2_ws
 
