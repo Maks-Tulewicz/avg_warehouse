@@ -1,0 +1,38 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+data/logs/runs/*.csv
+!data/logs/runs/.gitkeep
+
+# ROS 2 Colcon workspace (NAJWIĘKSZY ŹRÓDŁO GB!)
+build/
+install/
+log/
+*.ros2
+
+# Docker cache
+.docker/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# Dane symulacji (staraj się nie trackować, ew. gzipuj)
+data/logs/runs/*.csv
+# Python venv
+venv/
+.venv/
+ENV/
+env/
+*egg-info/
