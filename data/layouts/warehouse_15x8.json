@@ -1,0 +1,78 @@
+{
+  "dimensions": {
+    "rows": 8,
+    "cols": 15
+  },
+  "lanes": {
+    "description": "One-way lanes forming a loop with cross connectors",
+    "cells": [
+      {"row": 1, "col": 0, "dir": "east"},
+      {"row": 1, "col": 1, "dir": "east"},
+      {"row": 1, "col": 2, "dir": "east"},
+      {"row": 1, "col": 3, "dir": "east"},
+      {"row": 1, "col": 4, "dir": "east"},
+      {"row": 1, "col": 5, "dir": "east"},
+      {"row": 1, "col": 6, "dir": "east"},
+      {"row": 1, "col": 7, "dir": "east"},
+      {"row": 1, "col": 8, "dir": "east"},
+      {"row": 1, "col": 9, "dir": "east"},
+      {"row": 1, "col": 10, "dir": "east"},
+      {"row": 1, "col": 11, "dir": "east"},
+      {"row": 1, "col": 12, "dir": "east"},
+      {"row": 1, "col": 13, "dir": "east"},
+      {"row": 1, "col": 14, "dir": "east"},
+      {"row": 6, "col": 14, "dir": "south"},
+      {"row": 7, "col": 14, "dir": "west"},
+      {"row": 7, "col": 13, "dir": "west"},
+      {"row": 7, "col": 12, "dir": "west"},
+      {"row": 7, "col": 11, "dir": "west"},
+      {"row": 7, "col": 10, "dir": "west"},
+      {"row": 7, "col": 9, "dir": "west"},
+      {"row": 7, "col": 8, "dir": "west"},
+      {"row": 7, "col": 7, "dir": "west"},
+      {"row": 7, "col": 6, "dir": "west"},
+      {"row": 7, "col": 5, "dir": "west"},
+      {"row": 7, "col": 4, "dir": "west"},
+      {"row": 7, "col": 3, "dir": "west"},
+      {"row": 7, "col": 2, "dir": "west"},
+      {"row": 7, "col": 1, "dir": "west"},
+      {"row": 7, "col": 0, "dir": "west"},
+      {"row": 0, "col": 0, "dir": "north"},
+      {"row": 1, "col": 0, "dir": "north"}
+    ]
+  },
+  "buffers": {
+    "pickup_stations": [
+      {"name": "P1", "row": 2, "col": 2},
+      {"name": "P2", "row": 2, "col": 5},
+      {"name": "P3", "row": 2, "col": 8},
+      {"name": "P4", "row": 2, "col": 11},
+      {"name": "P5", "row": 2, "col": 14}
+    ],
+    "delivery_stations": [
+      {"name": "D1", "row": 5, "col": 2},
+      {"name": "D2", "row": 5, "col": 8},
+      {"name": "D3", "row": 5, "col": 14}
+    ],
+    "charging_ports": [
+      {"name": "C1", "row": 3, "col": 1},
+      {"name": "C2", "row": 3, "col": 4},
+      {"name": "C3", "row": 3, "col": 7},
+      {"name": "C4", "row": 3, "col": 10}
+    ],
+    "parking": [
+      {"name": "K1", "row": 4, "col": 1},
+      {"name": "K2", "row": 4, "col": 4},
+      {"name": "K3", "row": 4, "col": 7},
+      {"name": "K4", "row": 4, "col": 10},
+      {"name": "K5", "row": 4, "col": 13},
+      {"name": "K6", "row": 6, "col": 1}
+    ]
+  },
+  "connections": {
+    "cross_connectors": [
+      {"from": {"row": 1, "col": 3}, "to": {"row": 3, "col": 3}, "direction": "south"},
+      {"from": {"row": 1, "col": 9}, "to": {"row": 3, "col": 9}, "direction": "south"}
+    ]
+  }
+}

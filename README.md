@@ -36,6 +36,7 @@ avg_warehouse/
 │   │   ├── warehouse.py       # Grid layout, graph G=(V,A)
 │   │   ├── robot.py           # Robot state tuple si
 │   │   ├── events.py          # Event definitions, EF(s)
+│   │   ├── state.py           # System state representation
 │   │   └── transitions.py     # next_state(s, e) function
 │   ├── supervisor/
 │   │   ├── __init__.py
@@ -50,9 +51,9 @@ avg_warehouse/
 │   └── ros2/
 │       ├── fleet_supervisor/  # ROS 2 node package
 │       │   ├── CMakeLists.txt
-│   │       ├── package.xml
+│       │   ├── package.xml
 │       │   └── src/
-│       │       └── supervisor_node.cpp
+│       │       └── supervisor_node.py
 │       └── robot_nodes/
 │           └── robot_controller/
 ├── tests/
@@ -74,16 +75,19 @@ avg_warehouse/
 │   ├── proposal.pdf          # Milestone 1
 │   ├── interim_report.pdf    # Milestone 2
 │   ├── final_report.pdf      # Milestone 4
+│   ├── literature.md         # Annotated bibliography
 │   └── user_guide.md
 ├── scripts/
 │   ├── run_simulation.py      # CLI for simulation experiments
 │   ├── visualize_state.py     # ASCII/grid state viewer
 │   └── reachability_check.py  # Reduced instance exhaustive analysis
+├── .dockerignore
 ├── .gitignore
-├── .flake8
-├── pyproject.toml
-├── requirements.txt
-├── requirements-dev.txt
+├── docker-compose.yml
+├── Dockerfile
+├── Makefile
+├── requirements.txt           # Pure Python dependencies
+├── requirements-dev.txt       # Dev tools
 ├── README.md                  # This file
 └── CHANGELOG.md
 ```
@@ -94,35 +98,179 @@ avg_warehouse/
 
 ### Environment Setup
 
+**Requirements**: Docker 20+, Docker Compose v2 (plugin), Linux/macOS or WSL2 with X-server (Windows)
+
 ```bash
 # Clone and enter repository
 git clone <repo-url> && cd avg_warehouse
 
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # Linux/macOS
-# or: venv\Scripts\activate  # Windows
+# Build Docker image (once)
+make build
 
-# Install dependencies
-pip install -r requirements.txt
+# Start container in background
+make up
 
-# Install development dependencies (optional)
-pip install -r requirements-dev.txt
+# Enter the container
+make shell
+```
+
+### Inside the Container
+
+```bash
+# Run simulation (pure Python, no ROS)
+python3 scripts/run_simulation.py --robots 10 --orders 50 --duration 3600
 
 # Run tests
-pytest tests/ -v
+python3 -m pytest tests/ -v
 
-# Run basic simulation
-python scripts/run_simulation.py --robots 10 --orders 50 --duration 3600
+# Build ROS 2 packages
+colcon build --symlink-install
+
+# Visualize warehouse state
+python3 scripts/visualize_state.py
 ```
 
-### Requirements Export
+### Exiting and Cleanup
 
-After activating venv and installing packages:
 ```bash
-pip freeze > requirements.txt
-pip freeze > requirements-dev.txt  # dev packages separately
+# Exit container
+exit
+
+# Stop containers
+make down
+
+# Clean build artifacts
+make clean
 ```
+
+---
+
+## Requirements Files
+
+### `requirements.txt` (Pure Python)
+
+```
+numpy>=1.24,<2
+networkx>=3.1
+matplotlib>=3.7
+```
+
+**Important**: Does NOT contain any ROS 2 packages (rclpy, rosidl, *-msgs). Those are installed via apt in the Docker image.
+
+### `requirements-dev.txt` (Dev Tools)
+
+```
+pytest>=7.3
+pytest-cov>=4.1
+flake8>=6.0
+black>=23.7
+isort>=5.12
+```
+
+---
+
+## Docker Architecture
+
+### Why Docker?
+
+- **Consistency**: All team members use identical ROS 2 Humble + Python environment
+- **Isolation**: No risk of "breaking" your host system with ROS dependencies
+- **ROS 2 GUI Support**: Gazebo and RViz work via X11 forwarding
+- **Portability**: One command to set up development environment
+
+### What Goes Where
+
+| Location | Contents | Git-tracked? |
+|----------|----------|--------------|
+| **GitHub Repo** | Source code, config files, requirements | ✅ ~5 MB |
+| **Local Disk** | Docker images (~5 GB), build artifacts | ❌ |
+| **Container** | Python packages, ROS 2 runtime | N/A |
+| **.gitignore** | `build/`, `install/`, `log/`, `venv/` | N/A |
+
+### Troubleshooting Docker
+
+**Problem**: `docker compose` command not found  
+**Solution**: Install Docker Compose plugin:
+```bash
+sudo apt-get install docker-compose-plugin
+docker compose version
+```
+
+**Problem**: GUI apps (Gazebo/RViz) won't start  
+**Solution**: Ensure DISPLAY variable is set:
+```bash
+export DISPLAY=:0
+docker compose up -d
+```
+
+On Windows (WSL2): Install VcXsrv or Xming, set `DISPLAY=$(hostname).local:0`.
+
+---
+
+## Development Workflow
+
+### Branch Strategy
+
+```
+main                          # Production-ready code
+├── develop                   # Integration branch
+│   ├── feature/model-core
+│   ├── feature/safety-algo
+│   ├── feature/simulator
+│   └── feature/ros2-integration
+└── hotfix/*                  # Urgent bug fixes
+```
+
+### Pull Request Process
+
+1. Create feature branch from `develop`
+2. Implement changes with tests
+3. Submit PR for review (minimum 1 approver)
+4. CI must pass (pytest + flake8)
+5. Merge to `develop`
+6. Tag releases at milestones: `m1`, `m2`, `m3`, `v1.0`
+
+### Commit Convention
+
+```
+type(scope): description
+
+Examples:
+- feat(model): add warehouse layout loader
+- fix(supervisor): correct deadlock avoidance edge case
+- chore(docker): update requirements, remove ROS packages
+- docs: update README with new commands
+```
+
+---
+
+## Testing
+
+```bash
+# All tests
+python3 -m pytest tests/ -v
+
+# Specific module
+python3 -m pytest tests/test_safety.py -v
+
+# With coverage
+python3 -m pytest tests/ --cov=src --cov-report=html
+
+# Linting
+flake8 src/
+black --check src/ tests/
+```
+
+---
+
+## Milestones
+
+| Milestone | Deadline | Deliverable |
+|-----------|----------|-------------|
+| **M1** | 20 Oct 2026 | Proposal report (problem, model concept, plan) |
+| **M2** | 20 Nov 2026 | Formal model, safety proof, simulator KPIs, reachability analysis |
+| **M3** | 11 Dec 2026 | 10-robot ROS 2/Gazebo demonstration |
+| **M4** | 22 Dec 2026 | Final report, presentation, source archive |
 
 ---
 
@@ -156,42 +304,6 @@ Algorithm `safe(s, e)` ensures deadlock freedom by verifying that after any prop
 
 ---
 
-## Milestones
-
-| Milestone | Deadline | Deliverable |
-|-----------|----------|-------------|
-| M1 | 20 Oct 2026 | Proposal report (this doc) |
-| M2 | 20 Nov 2026 | Formal model, safety proof, simulator KPIs |
-| M3 | 11 Dec 2026 | 10-robot ROS 2/Gazebo demo |
-| M4 | 22 Dec 2026 | Final report, presentation, source archive |
-
----
-
-## Development Workflow
-
-### Branch Strategy
-
-```
-main                          # Production-ready code
-├── develop                   # Integration branch
-│   ├── feature/model-core
-│   ├── feature/safety-algo
-│   ├── feature/simulator
-│   └── feature/ros2-integration
-└── hotfix/*                  # Urgent bug fixes
-```
-
-### Pull Request Process
-
-1. Create feature branch from `develop`
-2. Implement changes with tests
-3. Submit PR for review (minimum 1 approver)
-4. CI must pass (pytest + flake8)
-5. Merge to `develop`
-6. Tag releases at milestones: `m1`, `m2`, `m3`, `v1.0`
-
----
-
 ## Key Performance Indicators
 
 - **Throughput Θ**: Orders delivered per hour
@@ -202,63 +314,45 @@ main                          # Production-ready code
 
 ---
 
-## Testing
+## Literature
 
-```bash
-# All tests
-pytest tests/ -v
+See `docs/literature.md` for annotated bibliography on:
+- Resource Allocation Systems (RAS)
+- AGV deadlock avoidance and Banker's algorithm
+- Supervisory control of discrete-event systems
+- Petri net-based deadlock prevention
+- Multi-robot path planning (MAPF)
 
-# Specific module
-pytest tests/test_safety.py -v
-
-# With coverage
-pytest tests/ --cov=src --cov-report=html
-
-# Reachability analysis (reduced instance)
-python scripts/reachability_check.py --robots 4 --layout small
-```
-## Docker Development Environment
-
-**Wymagania**: Docker 20+, Docker Compose v2, X11 (Linux/macOS) lub WSL2 z X-server (Windows)
-
-### Szybki Start
-
-```bash
-# 1. Budowanie obrazu (tylko raz)
-make build
-
-# 2. Uruchomienie kontenera w tle
-make up
-
-# 3. Wejście do kontenera
-make shell
-
-# 4. Uruchomienie symulacji
-make simulate
-
-# 5. Testy jednostkowe
-make test
-
-# 6. Budowanie ROS 2 paczek
-make colcon-build
+Key references:
+- Wonham & Cai, *Supervisory Control of Discrete-Event Systems*, Springer 2018
+- Ramadge & Wonham, *The control of discrete event systems*, Proc. IEEE 1989
+- Modified Banker's algorithm variants for multi-AGV systems (IEEE CASE 2011)
+- Zone-control deadlock prediction for AGV systems (Int. J. Production Research 1994)
 
 ---
 
-## References
+## Team Roles
 
-See `docs/literature.md` for annotated bibliography on RAS, AGV deadlock avoidance, and discrete-event control.
+| Member | Index | Responsibilities |
+|--------|-------|------------------|
+| Jakub Wilczyński | 275459 | Coordinator, formal model (T2), supervisor node (T7), experiments (T8) |
+| Nylan Santos | 300482 | Formal model (T2), safety proof (T3), verification (T4) |
+| Antoni Piałucha | 275411 | Simulator (T4), Gazebo world (T5), KPI evaluation (T8) |
+| Maksymilian Tulewicz | 275421 | ROS 2 nodes (T6), integration (T7), demo video (T9) |
 
 ---
 
-## License
+## Project Management
 
-Private during semester. May be published under MIT license after grading with team consent.
+- **Weekly Standups**: Monday evenings, 30 minutes
+- **Communication**: Discord server (24h response on working days)
+- **Code Review**: Pull requests require 1 approval, passing CI
+- **Documentation**: LaTeX reports via Overleaf, diagrams in TikZ
 
 ---
 
-## Contact
+## Disclosure
 
-- **Coordinator**: Jakub Wilczyński (275459)
-- **Instructor**: Gurjinder Singh
-- **Communication**: Team Discord 
-- **Issue Tracking**: GitHub Projects board
+Reports are intended for the instructor and the team. Source code is kept in a private repository during the semester and may be published under the MIT licence after grading, with the consent of all members.
+
+---
